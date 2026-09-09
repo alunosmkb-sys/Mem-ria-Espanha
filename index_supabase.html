@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Memoria España | Henrique, Davi y Pedro</title>
+<style>
+:root{--red:#c8102e;--gold:#ffb81c;--orange:#ff7a00;--black:#090909;--panel:#151515;--text:#fff}
+*{box-sizing:border-box} body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at top,#25100b 0,#090909 55%,#050505 100%);color:var(--text);min-height:100vh}
+header{text-align:center;padding:24px 16px 10px}.flag{width:88px;height:56px;margin:auto;border-radius:8px;overflow:hidden;background:linear-gradient(#c60b1e 0 25%,#ffc400 25% 75%,#c60b1e 75%);box-shadow:0 0 22px #ff7a0055}
+h1{margin:14px 0 4px;font-size:clamp(28px,5vw,52px);letter-spacing:2px} .sub{color:#ffc96b;margin:0}
+.creator{margin:10px auto 18px;color:#ddd;font-size:14px}.creator b{color:#ff9a2f}
+.wrap{max-width:1050px;margin:auto;padding:0 16px 35px}.top{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:15px}
+.badge,.btn{background:#171717;border:1px solid #333;border-radius:999px;padding:10px 16px}.badge strong{color:#ff9a2f}
+.btn{cursor:pointer;color:white;font-weight:bold}.btn:hover{border-color:#ff7a00;transform:translateY(-1px)}
+.game{display:grid;grid-template-columns:repeat(5,1fr);gap:13px;max-width:850px;margin:0 auto}
+.card{aspect-ratio:1/1.15;perspective:900px;cursor:pointer}.inner{width:100%;height:100%;position:relative;transition:.45s;transform-style:preserve-3d}.card.open .inner,.card.matched .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;display:flex;align-items:center;justify-content:center;text-align:center}
+.back{background:linear-gradient(145deg,#050505,#191919);border:2px solid #ff7a00;box-shadow:inset 0 0 0 5px #0b0b0b,0 7px 18px #000}
+.back:after{content:"🇪🇸";font-size:45px;filter:drop-shadow(0 0 8px #ff7a00)}
+.front{transform:rotateY(180deg);background:linear-gradient(145deg,#fff,#eee);color:#111;border:2px solid #ffb81c;flex-direction:column;padding:8px}
+.front .emoji{font-size:clamp(38px,6vw,64px);margin-bottom:5px}.word{font-weight:900;font-size:clamp(15px,2.2vw,23px);text-transform:uppercase}.type{font-size:10px;color:#777;margin-top:5px;letter-spacing:1px}
+.matched .front{box-shadow:0 0 22px #ffb81c88;border-color:#fff}.matched{cursor:default}
+#status{text-align:center;min-height:25px;margin:15px;font-weight:bold;color:#ffc96b}
+section{max-width:850px;margin:24px auto;background:#111;border:1px solid #2c2c2c;border-radius:18px;padding:18px}
+section h2{margin:0 0 10px;color:#ff9a2f}.rank{width:100%;border-collapse:collapse}.rank td,.rank th{padding:9px;border-bottom:1px solid #292929;text-align:left}.rank th{color:#ffb81c}
+footer{text-align:center;color:#777;padding:15px;font-size:13px}
+@media(max-width:700px){.game{grid-template-columns:repeat(4,1fr);gap:9px}.card{aspect-ratio:1/1.12}}
+@media(max-width:430px){.game{grid-template-columns:repeat(4,1fr)}.back:after{font-size:31px}.front .emoji{font-size:34px}}
+
+.start-screen{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at center,#32160c,#090909 65%)}.start-card{width:min(440px,100%);text-align:center;background:#111;border:1px solid #ff7a00;border-radius:24px;padding:34px 25px;box-shadow:0 20px 70px #000}.mini-flag{font-size:58px}.start-card h2{font-size:34px;margin:12px 0 6px;letter-spacing:2px}.start-card p{color:#bbb}.start-card input{width:100%;padding:14px 16px;border-radius:12px;border:1px solid #444;background:#090909;color:#fff;font-size:17px;text-align:center;outline:none;margin:10px 0 12px}.start-card input:focus{border-color:#ff7a00}.start-btn{width:100%;padding:14px;border-radius:12px;background:#ff7a00;border-color:#ff9b45;color:#111}.start-btn:hover{background:#ffb81c}
+.pt{color:#aaa;font-size:.86em;font-weight:normal}.pt-btn{font-weight:normal;font-size:.9em;color:#222} .start-card .pt{display:inline-block;margin-top:3px}
+</style>
+</head>
+<body>
+<header>
+<div class="flag"></div>
+<h1>MEMORIA ESPAÑA</h1>
+<p class="sub">Encuentra las 10 parejas <span class="pt">• Encontre os 10 pares</span></p>
+<div class="creator">Creado por <b>Henrique • Davi • Pedro</b></div>
+</header>
+<div id="startScreen" class="start-screen">
+  <div class="start-card">
+    <div class="mini-flag">🇪🇸</div>
+    <h2>MEMORIA ESPAÑA</h2>
+    <p>Escribe tu nombre para entrar en el ranking.<br><span class="pt">Digite seu nome para entrar no ranking.</span></p>
+    <input id="playerName" maxlength="20" placeholder="Tu nombre / Seu nome" autocomplete="off">
+    <button class="btn start-btn" onclick="startGame()">▶ Empezar juego <span class="pt-btn">• Começar jogo</span></button>
+    <div class="creator">Creado por <b>Henrique • Davi • Pedro</b></div>
+  </div>
+</div>
+<div class="wrap" id="gameArea" style="display:none">
+<div class="top">
+<div class="badge">⏱️ Tiempo / Tempo: <strong id="time">00:00</strong></div>
+<div class="badge">🏆 Parejas / Pares: <strong id="pairs">0/10</strong></div>
+<div class="badge">❌ Intentos / Tentativas: <strong id="tries">0</strong></div>
+<button class="btn" onclick="newGame()">🔄 Nuevo juego <span class="pt-btn">• Novo jogo</span></button>
+</div>
+<div id="status">¡Haz clic en dos cartas para encontrar una pareja!<br><span class="pt">Clique em duas cartas para encontrar um par!</span></div>
+<div id="game" class="game"></div>
+
+<section>
+<h2>🏆 Ranking de tiempo <span class="pt">/ Ranking de tempo</span></h2>
+<table class="rank"><thead><tr><th>#</th><th>Jugador / Jogador</th><th>Tiempo / Tempo</th><th>Intentos / Tentativas</th></tr></thead>
+<tbody id="ranking"></tbody></table>
+<p style="color:#888;font-size:12px">El ranking se guarda online y puede ser visto en diferentes dispositivos.<br>O ranking é salvo online e pode ser visto em diferentes dispositivos.</p>
+</section>
+</div>
+<footer>MEMORIA ESPAÑA • Proyecto escolar / Projeto escolar • Henrique, Davi y Pedro</footer>
+
+<script>
+const pairs=[
+["👨‍⚕️","Médico","Profesión"],["👨‍🏫","Profesor","Profesión"],["👨‍🚒","Bombero","Profesión"],
+["🔴","Rojo","Color"],["🔵","Azul","Color"],["🟢","Verde","Color"],
+["🍕","Pizza","Comida"],["🍔","Hamburguesa","Comida"],["🍦","Helado","Comida"],["🍎","Manzana","Comida"]
+];
+// Supabase: ranking online
+const SUPABASE_URL = "https://xqyypfdgaocbciduwtfn.supabase.co";
+const SUPABASE_KEY = "sb_publishable_kxxxTWvQ-9fg6bj1w8TuNQ_W8THckxN";
+const RANKING_TABLE = "ranking";
+
+let deck=[],first=null,second=null,lock=false,matched=0,tries=0,seconds=0,timer=null,playerName="";
+
+function shuffle(a){return a.sort(()=>Math.random()-.5)}
+function startGame(){
+ const input=document.getElementById("playerName");
+ const name=input.value.trim();
+ if(!name){input.focus();return}
+ playerName=name.slice(0,20);
+ document.getElementById("startScreen").style.display="none";
+ document.getElementById("gameArea").style.display="block";
+ newGame();
+}
+function newGame(){
+ clearInterval(timer);seconds=0;matched=0;tries=0;first=null;second=null;lock=false;
+ document.getElementById("time").textContent="00:00";document.getElementById("pairs").textContent="0/10";document.getElementById("tries").textContent="0";
+ document.getElementById("status").innerHTML="¡Haz clic en dos cartas para encontrar una pareja!<br><span class=\"pt\">Clique em duas cartas para encontrar um par!</span>";
+ deck=shuffle(pairs.flatMap((p,i)=>[{id:i,kind:"img",p},{id:i,kind:"word",p}]));
+ const g=document.getElementById("game");g.innerHTML="";
+ deck.forEach((c,i)=>{const el=document.createElement("div");el.className="card";el.dataset.i=i;el.innerHTML=`<div class="inner"><div class="face back"></div><div class="face front">${c.kind==="word"?`<div class="word">${c.p[1]}</div>`:`<div class="emoji">${c.p[0]}</div>`}</div></div>`;el.onclick=()=>flip(el,i);g.appendChild(el)});
+ timer=setInterval(()=>{seconds++;document.getElementById("time").textContent=fmt(seconds)},1000);
+}
+function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+function flip(el,i){
+ if(lock||el.classList.contains("open")||el.classList.contains("matched"))return;
+ if(seconds===1&&tries===0){} el.classList.add("open");
+ if(!first){first={el,i};return}
+ second={el,i};tries++;document.getElementById("tries").textContent=tries;lock=true;
+ const a=deck[first.i],b=deck[second.i];
+ if(a.id===b.id&&a.kind!==b.kind){
+  first.el.classList.add("matched");second.el.classList.add("matched");matched++;
+  document.getElementById("pairs").textContent=matched+"/10";
+  document.getElementById("status").innerHTML="✅ ¡Pareja correcta!<br><span class=\"pt\">Par correto!</span>";
+  first=null;second=null;lock=false;
+  if(matched===10)finish();
+ }else{
+  document.getElementById("status").innerHTML="❌ No coinciden...<br><span class=\"pt\">Não correspondem...</span>";
+  setTimeout(()=>{first.el.classList.remove("open");second.el.classList.remove("open");first=null;second=null;lock=false;document.getElementById("status").innerHTML="¡Inténtalo otra vez!<br><span class=\"pt\">Tente novamente!</span>";},850);
+ }
+}
+function finish(){
+  clearInterval(timer);
+  document.getElementById("status").innerHTML="🎉 ¡Excelente! Has encontrado todas las parejas en "+fmt(seconds)+"!<br><span class=\"pt\">Excelente! Você encontrou todos os pares em "+fmt(seconds)+"!</span>";
+
+  const name=(playerName||"Jugador").trim().slice(0,20);
+  if(name) saveScore(name,seconds,tries);
+}
+async function saveScore(name,time,tries){
+  try{
+    const response=await fetch(SUPABASE_URL+"/rest/v1/"+RANKING_TABLE,{
+      method:"POST",
+      headers:{
+        "apikey":SUPABASE_KEY,
+        "Authorization":"Bearer "+SUPABASE_KEY,
+        "Content-Type":"application/json",
+        "Prefer":"return=minimal"
+      },
+      body:JSON.stringify({name,time,tries})
+    });
+
+    if(!response.ok){
+      console.error("Erro ao salvar recorde:",await response.text());
+      document.getElementById("status").innerHTML+="<br><span style='color:#ff7777'>Não foi possível salvar o recorde online.</span>";
+      return;
+    }
+    await renderRank();
+  }catch(error){
+    console.error("Erro de conexão com Supabase:",error);
+    document.getElementById("status").innerHTML+="<br><span style='color:#ff7777'>Sem conexão com o ranking online.</span>";
+  }
+}
+
+async function renderRank(){
+  const tb=document.getElementById("ranking");
+  tb.innerHTML='<tr><td colspan="4" style="color:#777">Carregando ranking...</td></tr>';
+
+  try{
+    const response=await fetch(
+      SUPABASE_URL+"/rest/v1/"+RANKING_TABLE+"?select=name,time,tries&order=time.asc,tries.asc&limit=10",
+      {
+        headers:{
+          "apikey":SUPABASE_KEY,
+          "Authorization":"Bearer "+SUPABASE_KEY
+        }
+      }
+    );
+
+    if(!response.ok){
+      console.error("Erro ao carregar ranking:",await response.text());
+      tb.innerHTML='<tr><td colspan="4" style="color:#ff7777">Erro ao carregar o ranking.</td></tr>';
+      return;
+    }
+
+    const r=await response.json();
+    tb.innerHTML="";
+
+    if(!r.length){
+      tb.innerHTML='<tr><td colspan="4" style="color:#777">Todavía no hay resultados.</td></tr>';
+      return;
+    }
+
+    r.forEach((x,i)=>{
+      tb.innerHTML+=`<tr><td>${i+1}</td><td>${esc(String(x.name??""))}</td><td>${fmt(Number(x.time)||0)}</td><td>${Number(x.tries)||0}</td></tr>`;
+    });
+  }catch(error){
+    console.error("Erro de conexão com Supabase:",error);
+    tb.innerHTML='<tr><td colspan="4" style="color:#ff7777">Sem conexão com o ranking online.</td></tr>';
+  }
+}
+function esc(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+renderRank();
+</script>
+</body>
+</html>
